@@ -224,7 +224,7 @@ const promptUser = () => {
         name: 'salary',
         message: "What is the salary of this role?",
         validate: addSalary => {
-          if (isNAN(addSalary)) {
+          if (addSalary) {
               return true;
           } else {
               console.log('Please enter a salary');
@@ -407,7 +407,6 @@ const promptUser = () => {
                   params[1] = employee 
                   
   
-                  // console.log(params)
   
                   const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
   
@@ -487,6 +486,7 @@ const promptUser = () => {
   };
   // function to view employee by manager
   employeeManager = () => {
+    
       console.log('Showing employees by manager');
       const sql = `SELECT employee.first_name, 
                    employee.last_name,
@@ -497,7 +497,7 @@ const promptUser = () => {
                    LEFT JOIN employee manager ON employee.manager_id = manager.id
                    ORDER BY manager`;
 
-    Connection.query(sql, (err, rows) => {
+    db.query(sql, (err, rows) => {
         if (err) throw err; 
         console.table(rows); 
         promptUser();
