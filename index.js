@@ -488,21 +488,51 @@ const promptUser = () => {
   employeeManager = () => {
     
       console.log('Showing employees by manager');
-      const sql = `SELECT employee.first_name, 
-                   employee.last_name,
-                   role.title AS role,
-                   CONCAT (manager.first_name, " ", manager.last_name) AS manager
-                   FROM employee
-                   LEFT JOIN role ON employee.role_id = role.id 
-                   LEFT JOIN employee manager ON employee.manager_id = manager.id
-                   ORDER BY manager`;
+      const sqlManager = `SELECT * FROM employee`;
 
-    db.query(sql, (err, rows) => {
+    db.query(sqlManager, (err, data) => {
         if (err) throw err; 
-        console.table(rows); 
-        promptUser();
+      
+        const managers = data.map(({ id, first_name, last_name }) => ({ name: first_name + " "+ last_name, value: id }));
+
+        inquirer.prompt([
+          {
+            type: 'list',
+            name: 'manager',
+            message: "Which manager's employees would you like to see?",
+            choices: managers
+          }
+        ])
+            .then(managerChoice => {
+              const manager = managerChoice.manager;
+              params = [];
+              
+              params.push(manager);
+              let managers = params[0]
+              params[0] = manager;
+              
+
+               //console.log(params)
+
+              const sql = `SELECT employee.first_name, 
+              employee.last_name,
+              role.title AS role,
+              CONCAT (manager.first_name, " ", manager.last_name) AS manager
+              FROM employee
+              LEFT JOIN role ON employee.role_id = role.id 
+              LEFT JOIN employee manager ON employee.manager_id = manager.id
+              WHERE manager.id = ?`;
+
+              db.query(sql, params, (err, rows) => {
+                if (err) throw err;
+                console.table(rows);
+
+
+                promptUser();
+
     }); 
-  }
+  })
+  })
   // function to view employee by department
   employeeDepartment = () => {
     console.log('Showing employees by department...\n');
@@ -633,3 +663,4 @@ const promptUser = () => {
     });            
   };
 
+  }
